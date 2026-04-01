@@ -17,156 +17,174 @@ const workouts = {
   ]
 };
 
-const foodDB = {
-  "arroz": { cal: 130, protein: 2 },
-  "feijao": { cal: 120, protein: 8 },
-  "frango": { cal: 200, protein: 30 },
-  "ovo": { cal: 70, protein: 6 },
-  "hamburguer": { cal: 250, protein: 20 },
-  "macarrao": { cal: 200, protein: 6 },
-  "doce": { cal: 150, protein: 2 }
-};
-
 export default function App() {
   const today = new Date().toISOString().split("T")[0];
 
   const [tab, setTab] = useState("home");
   const [checkins, setCheckins] = useState([]);
-  const [logs, setLogs] = useState({});
   const [dailyLogs, setDailyLogs] = useState({});
-  const [foodLog, setFoodLog] = useState([]);
   const [selectedDay, setSelectedDay] = useState("Push");
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [exerciseState, setExerciseState] = useState({});
 
   useEffect(() => {
     setCheckins(JSON.parse(localStorage.getItem("checkins")) || []);
-    setLogs(JSON.parse(localStorage.getItem("logs")) || {});
     setDailyLogs(JSON.parse(localStorage.getItem("dailyLogs")) || {});
-    setFoodLog(JSON.parse(localStorage.getItem("food")) || []);
   }, []);
 
   useEffect(() => {
     localStorage.setItem("checkins", JSON.stringify(checkins));
-    localStorage.setItem("logs", JSON.stringify(logs));
     localStorage.setItem("dailyLogs", JSON.stringify(dailyLogs));
-    localStorage.setItem("food", JSON.stringify(foodLog));
-  }, [checkins, logs, dailyLogs, foodLog]);
+  }, [checkins, dailyLogs]);
 
-  const checkin = () => {
+  const handleCheckin = () => {
     if (!checkins.includes(today)) setCheckins([...checkins, today]);
+    setTab("treino");
   };
 
-  const saveWorkout = (ex) => {
-    const weight = document.getElementById(ex+"w").value;
-    const reps = document.getElementById(ex+"r").value;
+  const handleChange = (ex, field, value) => {
+    setExerciseState({
+      ...exerciseState,
+      [ex]: {
+        ...exerciseState[ex],
+        [field]: value
+      }
+    });
+  };
+
+  const toggleDone = (ex) => {
+    setExerciseState({
+      ...exerciseState,
+      [ex]: {
+        ...exerciseState[ex],
+        done: !exerciseState[ex]?.done
+      }
+    });
+  };
+
+  const finishWorkout = () => {
+    const entries = Object.keys(exerciseState).map(ex => ({
+      ex,
+      weight: exerciseState[ex]?.weight || "",
+      reps: exerciseState[ex]?.reps || ""
+    }));
 
     setDailyLogs({
       ...dailyLogs,
-      [today]: [...(dailyLogs[today] || []), { ex, weight, reps }]
+      [today]: entries
     });
 
-    setLogs({
-      ...logs,
-      [ex]: [...(logs[ex] || []), { weight, date: today }]
-    });
+    setExerciseState({});
+    setTab("home");
   };
-
-  const addFood = () => {
-    const name = document.getElementById("food").value.toLowerCase();
-    const food = foodDB[name];
-    if (!food) return;
-    setFoodLog([...foodLog, { name, ...food }]);
-  };
-
-  const totalCalories = foodLog.reduce((a,b)=>a+b.cal,0);
-  const totalProtein = foodLog.reduce((a,b)=>a+b.protein,0);
-
-  const proteinGoal = 160;
-  const calorieGoal = 2200;
 
   const streak = checkins.length;
 
   return (
-    <div style={{padding:20, background:"#0f0f0f", color:"white", minHeight:"100vh"}}>
+    <div style={{padding:20, background:"#0a0a0a", color:"#f1f1f1", minHeight:"100vh", fontFamily:"Arial"}}>
 
-      <h1 style={{textAlign:"center"}}>🔥 GOD FITNESS APP</h1>
+      <h1 style={{textAlign:"center", color:"#00ff88"}}>🔥 GOD FITNESS</h1>
 
-      <div style={{display:"flex", justifyContent:"space-around"}}>
-        <button onClick={()=>setTab("home")}>Home</button>
-        <button onClick={()=>setTab("treino")}>Treino</button>
-        <button onClick={()=>setTab("dieta")}>Dieta</button>
+      <div style={{display:"flex", justifyContent:"space-around", marginBottom:20}}>
+        <button onClick={()=>setTab("home")} style={btn}>Home</button>
+        <button onClick={()=>setTab("treino")} style={btn}>Treino</button>
       </div>
 
-      {tab==="home" && (
+      {tab === "home" && (
         <div>
-          <button onClick={checkin}>Check-in</button>
-          <p>🔥 Streak: {streak}</p>
+          <button onClick={handleCheckin} style={checkBtn}>🚀 Check-in Academia</button>
+          <p style={{marginTop:10}}>🔥 Streak: {streak}</p>
 
-          <h3>📅 Calendário</h3>
+          <h3>📅 Histórico</h3>
           {checkins.map((d,i)=>(
-            <div key={i} onClick={()=>setSelectedDate(d)} style={{cursor:"pointer"}}>{d}</div>
-          ))}
-
-          {selectedDate && (
-            <div>
-              <h4>Treino do dia:</h4>
-              {(dailyLogs[selectedDate]||[]).map((l,i)=>(
-                <div key={i}>{l.ex} - {l.weight}kg x {l.reps}</div>
+            <div key={i} style={{marginBottom:5}}>
+              {d}
+              {(dailyLogs[d]||[]).map((l,idx)=>(
+                <div key={idx} style={{fontSize:12, color:"#ccc"}}>
+                  {l.ex} - {l.weight}kg x {l.reps}
+                </div>
               ))}
             </div>
-          )}
-
-          <h3>📊 Progresso</h3>
-          <div>Proteína: {totalProtein}/{proteinGoal}</div>
-          <div style={{background:"gray", height:10}}>
-            <div style={{width:`${(totalProtein/proteinGoal)*100}%`, background:"green", height:10}}></div>
-          </div>
-
-          <div>Calorias: {totalCalories}/{calorieGoal}</div>
-          <div style={{background:"gray", height:10}}>
-            <div style={{width:`${(totalCalories/calorieGoal)*100}%`, background:"orange", height:10}}></div>
-          </div>
+          ))}
         </div>
       )}
 
-      {tab==="treino" && (
+      {tab === "treino" && (
         <div>
-          {Object.keys(workouts).map(day=>(
-            <button key={day} onClick={()=>setSelectedDay(day)}>{day}</button>
-          ))}
+          <div style={{marginBottom:10}}>
+            {Object.keys(workouts).map(day=>(
+              <button key={day} onClick={()=>setSelectedDay(day)} style={btn}>{day}</button>
+            ))}
+          </div>
 
-          {workouts[selectedDay].map(ex=>(
-            <div key={ex} style={{border:"1px solid gray", margin:10, padding:10}}>
-              <b>{ex}</b>
-              <br/>
-              <a href={`https://www.youtube.com/results?search_query=${ex}`} target="_blank">Ver execução</a>
-              <br/>
-              <input id={ex+"w"} placeholder="kg"/>
-              <input id={ex+"r"} placeholder="reps"/>
-              <button onClick={()=>saveWorkout(ex)}>Salvar</button>
+          {workouts[selectedDay].map(ex => (
+            <div key={ex} style={card}>
+              <div style={{display:"flex", justifyContent:"space-between"}}>
+                <b>{ex}</b>
+                <input type="checkbox" checked={exerciseState[ex]?.done || false} onChange={()=>toggleDone(ex)}/>
+              </div>
+
+              <a href={`https://www.youtube.com/results?search_query=${ex}`} target="_blank" style={{fontSize:12, color:"#00ff88"}}>
+                ▶ Ver execução
+              </a>
+
+              <div style={{marginTop:5}}>
+                <input placeholder="kg" style={input} onChange={(e)=>handleChange(ex,"weight",e.target.value)}/>
+                <input placeholder="reps" style={input} onChange={(e)=>handleChange(ex,"reps",e.target.value)}/>
+              </div>
             </div>
           ))}
+
+          <button onClick={finishWorkout} style={finishBtn}>✅ Concluir Treino</button>
         </div>
       )}
-
-      {tab==="dieta" && (
-        <div>
-          <h3>Dieta Inteligente</h3>
-          <input id="food" placeholder="arroz, feijao, frango..."/>
-          <button onClick={addFood}>Adicionar</button>
-
-          {foodLog.map((f,i)=>(
-            <div key={i}>{f.name} - {f.cal} kcal - {f.protein}g proteína</div>
-          ))}
-
-          <h4>Total: {totalCalories} kcal</h4>
-          <h4>Proteína: {totalProtein}g</h4>
-
-          <h3>Sugestão</h3>
-          <p>Baseado no seu gosto: arroz + feijão + frango + ovo + macarrão controlado</p>
-        </div>
-      )}
-
     </div>
   );
 }
+
+const btn = {
+  padding:10,
+  borderRadius:10,
+  border:"none",
+  background:"#1f1f1f",
+  color:"white",
+  margin:5
+};
+
+const checkBtn = {
+  width:"100%",
+  padding:15,
+  borderRadius:12,
+  border:"none",
+  background:"linear-gradient(90deg,#00ff88,#00cc66)",
+  color:"black",
+  fontWeight:"bold",
+  fontSize:16
+};
+
+const finishBtn = {
+  width:"100%",
+  padding:15,
+  borderRadius:12,
+  border:"none",
+  background:"#00ff88",
+  color:"black",
+  fontWeight:"bold",
+  marginTop:20
+};
+
+const input = {
+  width:"45%",
+  marginRight:"5%",
+  padding:8,
+  borderRadius:8,
+  border:"none",
+  marginTop:5
+};
+
+const card = {
+  border:"1px solid #333",
+  borderRadius:12,
+  padding:10,
+  marginBottom:10,
+  background:"#111"
+};
