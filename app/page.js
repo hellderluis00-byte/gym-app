@@ -42,6 +42,19 @@ export default function App(){
     localStorage.setItem("logs",JSON.stringify(logs));
   },[checkins,logs]);
 
+  // AUTOSAVE EM TEMPO REAL
+  useEffect(()=>{
+    if(Object.keys(exerciseState).length>0){
+      localStorage.setItem("draftWorkout", JSON.stringify({
+        date: dateStr,
+        workout: activeWorkout,
+        data: exerciseState
+      }));
+    }
+  },[exerciseState]);,JSON.stringify(checkins));
+    localStorage.setItem("logs",JSON.stringify(logs));
+  },[checkins,logs]);
+
   useEffect(()=>{
     const interval = setInterval(()=>{
       setTimers(prev=>{
@@ -78,13 +91,20 @@ export default function App(){
   };
 
   const saveWorkout=()=>{
+    const finalData = exerciseState;
+
     setLogs(prev=>({
       ...prev,
       [dateStr]:{
         workout: workoutToUse,
-        data: exerciseState
+        data: finalData
       }
     }));
+
+    localStorage.removeItem("draftWorkout");
+
+    alert("🔥 Parabéns! Treino finalizado com sucesso!");
+
     setExerciseState({});
     setActiveWorkout(null);
     setTab("home");
