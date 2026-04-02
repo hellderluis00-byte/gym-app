@@ -1,36 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
 
-// Segunda = Push
 const split = ["Rest","Push","Pull","Legs","Upper","Lower","Rest"];
 
 const workouts = {
-  Push: [
-    "Supino Reto Máquina","Supino Inclinado Máquina","Peck Deck","Crossover Polia Alta","Crossover Polia Baixa",
-    "Desenvolvimento Ombro Máquina","Elevação Lateral Polia","Posterior Ombro Polia",
-    "Tríceps Testa Polia","Tríceps Corda","Tríceps Francês Polia"
-  ],
-  Pull: [
-    "Puxada Frontal","Puxada Pegada Fechada","Remada Máquina","Remada Baixa Triângulo",
-    "Pulldown Braço Estendido","Face Pull","Rosca Direta Barra W","Rosca Scott","Rosca Martelo","Rosca Polia"
-  ],
-  Legs: [
-    "Agachamento","Leg Press","Cadeira Extensora","Mesa Flexora","Leg Curl em Pé",
-    "Elevação Pélvica","Abdutora","Adutora","Panturrilha"
-  ],
-  Upper: [
-    "Supino Inclinado Máquina","Crossover Polia Alta","Puxada Frontal","Remada Máquina",
-    "Elevação Lateral Polia","Posterior Ombro Polia","Tríceps Corda","Rosca Direta Barra W"
-  ],
-  Lower: [
-    "Agachamento","Leg Press","Cadeira Extensora","Mesa Flexora",
-    "Elevação Pélvica","Panturrilha","Abdutora","Adutora"
-  ]
+  Push: ["Supino Reto Máquina","Supino Inclinado Máquina","Peck Deck","Crossover Polia Alta","Crossover Polia Baixa","Desenvolvimento Ombro Máquina","Elevação Lateral Polia","Posterior Ombro Polia","Tríceps Testa Polia","Tríceps Corda","Tríceps Francês Polia"],
+  Pull: ["Puxada Frontal","Puxada Pegada Fechada","Remada Máquina","Remada Baixa Triângulo","Pulldown Braço Estendido","Face Pull","Rosca Direta Barra W","Rosca Scott","Rosca Martelo","Rosca Polia"],
+  Legs: ["Agachamento","Leg Press 45º","Cadeira Extensora","Mesa Flexora","Leg Curl em Pé","Elevação Pélvica","Abdutora","Adutora","Panturrilha"],
+  Upper: ["Supino Inclinado Máquina","Crossover Polia Alta","Puxada Frontal","Remada Máquina","Elevação Lateral Polia","Posterior Ombro Polia","Tríceps Corda","Rosca Direta Barra W"],
+  Lower: ["Agachamento","Leg Press 45º","Mesa Flexora","Stiff","Elevação Pélvica","Panturrilha","Abdutora"]
 };
 
-const absList = [
-  "Abdominal Máquina","Abdominal Supra","Abdominal Infra","Prancha"
-];
+const absList = ["Abdominal Máquina","Abdominal Supra","Abdominal Infra","Prancha"];
 
 const cardioMap = {
   Push: "Esteira 20min",
@@ -39,19 +20,17 @@ const cardioMap = {
   Lower: "Bike 20min"
 };
 
-export default function App() {
+export default function App(){
   const today = new Date();
   const dateStr = today.toISOString().split("T")[0];
-  const dayIndex = today.getDay();
-  const todayWorkout = split[dayIndex];
+  const todayWorkout = split[today.getDay()];
 
   const [tab,setTab]=useState("home");
   const [checkins,setCheckins]=useState([]);
   const [logs,setLogs]=useState({});
   const [exerciseState,setExerciseState]=useState({});
-  const [timer,setTimer]=useState(0);
-  const [focus,setFocus]=useState(false);
-  const [selectedDate,setSelectedDate]=useState(null);
+  const [activeWorkout,setActiveWorkout]=useState(null);
+  const [timers,setTimers]=useState({});
 
   useEffect(()=>{
     setCheckins(JSON.parse(localStorage.getItem("checkins"))||[]);
@@ -63,24 +42,27 @@ export default function App() {
     localStorage.setItem("logs",JSON.stringify(logs));
   },[checkins,logs]);
 
+  // TIMER POR EXERCÍCIO
   useEffect(()=>{
-    if(timer>0){
-      const t=setTimeout(()=>setTimer(timer-1),1000);
-      return ()=>clearTimeout(t);
-    }
-  },[timer]);
+    const interval = setInterval(()=>{
+      setTimers(prev=>{
+        const updated={...prev};
+        Object.keys(updated).forEach(k=>{
+          if(updated[k]>0) updated[k]--;
+        });
+        return updated;
+      });
+    },1000);
+    return ()=>clearInterval(interval);
+  },[]);
 
-  const checkin=()=>{
-    if(todayWorkout==="Rest") return alert("Hoje é descanso");
+  const startWorkout=(type)=>{
+    setActiveWorkout(type);
     if(!checkins.includes(dateStr)) setCheckins([...checkins,dateStr]);
     setTab("treino");
   };
 
-  const saveWorkout=()=>{
-    setLogs({...logs,[dateStr]:exerciseState});
-    setExerciseState({});
-    setTab("home");
-  };
+  const workoutToUse = activeWorkout || todayWorkout;
 
   const handleChange=(ex,field,val)=>{
     setExerciseState(prev=>({
@@ -89,184 +71,105 @@ export default function App() {
     }));
   };
 
-  const getStats=(ex)=>{
-    const entries=Object.values(logs);
-    let last=null;
-    let best=null;
+  const toggleCheck=(ex)=>{
+    setExerciseState(prev=>({
+      ...prev,
+      [ex]:{...prev[ex], done: !prev[ex]?.done}
+    }));
+  };
 
-    for(let i=0;i<entries.length;i++){
-      if(entries[i][ex]){
-        const data = entries[i][ex];
-
-        // último
-        last = data;
-
-        // melhor (PR) baseado em peso
-        if(!best || (data.weight && Number(data.weight) > Number(best.weight||0))){
-          best = data;
-        }
+  const saveWorkout=()=>{
+    setLogs(prev=>({
+      ...prev,
+      [dateStr]:{
+        workout: workoutToUse,
+        data: exerciseState
       }
-    }
+    }));
+    setExerciseState({});
+    setActiveWorkout(null);
+    setTab("home");
+  };
 
-    return { last, best };
+  const getLast=(ex)=>{
+    const entries=Object.values(logs);
+    for(let i=entries.length-1;i>=0;i--){
+      if(entries[i].data?.[ex]) return entries[i].data[ex];
+    }
+    return null;
   };
 
   const fullWorkout = () => {
-    let base = workouts[todayWorkout] || [];
-
-    // adicionar abdomen nos dias certos
-    if(["Push","Pull","Upper","Lower"].includes(todayWorkout)){
-      base = [...base, ...absList];
+    let base = workouts[workoutToUse] || [];
+    if(["Push","Pull","Upper","Lower"].includes(workoutToUse)){
+      base=[...base,...absList];
     }
-
-    // adicionar cardio como item do treino
-    if(cardioMap[todayWorkout]){
-      base = [...base, cardioMap[todayWorkout]];
-    }
-
+    if(cardioMap[workoutToUse]) base=[...base,cardioMap[workoutToUse]];
     return base;
   };
-
-  const weeklyGoal=5;
-  const thisWeek=checkins.length;
 
   return(
     <div style={{padding:20,background:"#0a0a0a",color:"white",minHeight:"100vh"}}>
 
-      <h1 style={{textAlign:"center",color:"#00ff88"}}>🔥 GOD FITNESS PRO</h1>
+      <h1>🔥 GOD FITNESS PRO</h1>
 
-      <div style={{display:"flex",justifyContent:"space-around"}}>
+      <div>
         <button onClick={()=>setTab("home")}>Home</button>
         <button onClick={()=>setTab("treino")}>Treino</button>
-        <button onClick={()=>setTab("todos")}>Todos</button>
       </div>
 
       {tab==="home" && (
         <div>
           <h2>Hoje: {todayWorkout}</h2>
+          <button onClick={()=>startWorkout(todayWorkout)}>Treino do dia</button>
 
-          {cardioMap[todayWorkout] && (
-            <p>🚴 Cardio: {cardioMap[todayWorkout]}</p>
-          )}
-
-          { ["Push","Pull","Upper","Lower"].includes(todayWorkout) && (
-            <p>🔥 Abdômen incluso</p>
-          )}
-
-          <button onClick={checkin} style={{padding:15,background:"#00ff88",border:"none"}}>Check-in</button>
-
-          <p>🔥 Semana: {thisWeek}/{weeklyGoal}</p>
-          <div style={{background:"gray",height:10}}>
-            <div style={{width:`${(thisWeek/weeklyGoal)*100}%`,background:"#00ff88",height:10}}></div>
-          </div>
-
-          <h3>📅 Histórico</h3>
-          {checkins.map((d,i)=>(
-            <div key={i} onClick={()=>setSelectedDate(d)} style={{cursor:"pointer"}}>{d}</div>
+          {Object.keys(workouts).map(w=>(
+            <button key={w} onClick={()=>startWorkout(w)}>{w}</button>
           ))}
 
-          {selectedDate && (
-            <div>
-              <h4>Treino:</h4>
-              {Object.entries(logs[selectedDate]||{}).map(([ex,val],i)=>(
-                <div key={i}>
-                  {ex} - {val.weight||""} {val.reps?`x ${val.reps}`:""} {val.time?`(${val.time}s)`:""}
-                </div>
-              ))}
+          <h3>Histórico</h3>
+          {Object.entries(logs).map(([date,val])=>(
+            <div key={date}>
+              <b>{date}</b> - {val.workout}
             </div>
-          )}
+          ))}
         </div>
       )}
 
-      {tab==="treino" && todayWorkout!=="Rest" && (
+      {tab==="treino" && (
         <div>
-          <h2>{todayWorkout}</h2>
+          <h2>{workoutToUse}</h2>
 
-          <button onClick={()=>setFocus(!focus)}>Modo Foco</button>
-
-          {(focus
-            ? [fullWorkout().find(ex=>!exerciseState[ex]?.done)]
-            : fullWorkout()
-          ).map(ex => (
-            ex ? (
-              <div key={ex} style={{border:"1px solid #333",padding:10,margin:10}}>
+          {fullWorkout().map(ex=>{
+            const last=getLast(ex);
+            return (
+              <div key={ex} style={{border:"1px solid #333",margin:10,padding:10}}>
                 <b>{ex}</b>
 
-                {/* mostrar carga anterior só pra musculação */}
-                {!ex.includes("Abdominal") && ex !== "Prancha" && !ex.includes("min") && (
-                  <p style={{fontSize:12}}>{(()=>{
-                  const {last, best} = getStats(ex);
-                  return (
-                    <>
-                      <p style={{fontSize:12}}>
-                        Último: {last ? `${last.weight||"-"}kg ${last.reps?`x ${last.reps}`:""}` : "-"}
-                      </p>
-                      {best && last && last.weight && Number(last.weight) >= Number(best.weight) && (
-                        <p style={{color:"#00ff88", fontSize:12}}>🔥 PR!</p>
-                      )}
-                    </>
-                  );
-                })()}</p>
-                )}
+                {last && <p>Último: {last.weight||"-"}kg {last.reps?`x ${last.reps}`:""}</p>}
 
-                <a href={`https://www.youtube.com/results?search_query=${ex}`} target="_blank" style={{color:"#00ff88",fontSize:12}}>
-                  ▶ Ver execução
-                </a>
-
-                {/* musculação normal */}
-                {!ex.includes("Abdominal") && ex !== "Prancha" && !ex.includes("min") && (
+                {!ex.includes("Abdominal") && ex!=="Prancha" && !ex.includes("min") && (
                   <>
-                    <input placeholder="kg" onChange={e=>handleChange(ex,"weight",e.target.value)}/>
-                    <input placeholder="reps" onChange={e=>handleChange(ex,"reps",e.target.value)}/>
+                    <input placeholder="kg" onChange={e=>handleChange(ex,"weight",e.target.value)} />
+                    <input placeholder="reps" onChange={e=>handleChange(ex,"reps",e.target.value)} />
                   </>
                 )}
 
-                {/* prancha com tempo */}
-                {ex === "Prancha" && (
-                  <input placeholder="tempo (segundos)" onChange={e=>handleChange(ex,"time",e.target.value)}/>
+                {ex==="Prancha" && (
+                  <input placeholder="tempo" onChange={e=>handleChange(ex,"time",e.target.value)} />
                 )}
 
-                <button onClick={()=>setTimer(90)}>⏱️ Descanso</button>
-                <p>{timer>0?`Descanso: ${timer}s`:""}</p>
+                <button onClick={()=>setTimers(prev=>({...prev,[ex]:90}))}>⏱️</button>
+                <span>{timers[ex]||0}s</span>
 
-                <button onClick={()=>handleChange(ex,"done",true)}>✔️ Concluir</button>
+                <button onClick={()=>toggleCheck(ex)}>
+                  {exerciseState[ex]?.done ? "✅" : "⬜"}
+                </button>
               </div>
-            ) : null
-          ))}
+            );
+          })}
 
-          <button onClick={saveWorkout} style={{padding:15,background:"#00ff88"}}>Finalizar</button>
-        </div>
-      )}
-
-      {tab==="todos" && (
-        <div>
-          <h2 style={{textAlign:"center", marginBottom:20}}>📚 Todos os Treinos</h2>
-
-          {[...Object.keys(workouts), "Abdomen"].map(day => (
-            <div key={day} style={{marginBottom:25}}>
-              <h3 style={{color:"#00ff88", marginBottom:10}}>{day}</h3>
-
-              <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:10}}>
-                {(day === "Abdomen" ? absList : workouts[day]).map(ex => (
-                  <div key={ex} style={{
-                    background:"#111",
-                    border:"1px solid #333",
-                    borderRadius:12,
-                    padding:10,
-                    display:"flex",
-                    justifyContent:"space-between",
-                    alignItems:"center"
-                  }}>
-                    <span style={{fontSize:13}}>{ex}</span>
-
-                    <a href={`https://www.youtube.com/results?search_query=${ex}`} target="_blank" style={{background:"#00ff88",color:"black",padding:"5px 8px",borderRadius:8,fontSize:12,textDecoration:"none"}}>
-                      ▶
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+          <button onClick={saveWorkout}>Finalizar treino</button>
         </div>
       )}
 
