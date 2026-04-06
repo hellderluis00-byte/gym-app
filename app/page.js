@@ -1,19 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
 
-// ─── Dados ───────────────────────────────────────────────────────────────────
-
 const SPLIT = ["Rest", "Push", "Pull", "Legs", "Upper", "Lower", "Rest"];
 
 const WORKOUTS = {
-  Push:  ["Supino Reto Máquina","Supino Inclinado Máquina","Peck Deck","Crossover Polia Alta","Crossover Polia Baixa","Desenvolvimento Ombro Máquina","Elevação Lateral Polia","Posterior Ombro Polia","Tríceps Testa Polia","Tríceps Corda","Tríceps Francês Polia"],
-  Pull:  ["Puxada Frontal","Puxada Pegada Fechada","Remada Máquina","Remada Baixa Triângulo","Pulldown Braço Estendido","Face Pull","Rosca Direta Barra W","Rosca Scott","Rosca Martelo","Rosca Polia"],
-  Legs:  ["Agachamento","Leg Press 45º","Cadeira Extensora","Mesa Flexora","Leg Curl em Pé","Elevação Pélvica","Abdutora","Adutora","Panturrilha"],
-  Upper: ["Supino Inclinado Máquina","Crossover Polia Alta","Puxada Frontal","Remada Máquina","Elevação Lateral Polia","Posterior Ombro Polia","Tríceps Corda","Rosca Direta Barra W"],
-  Lower: ["Agachamento","Leg Press 45º","Mesa Flexora","Stiff","Elevação Pélvica","Panturrilha","Abdutora"],
+  Push:  ["Supino Reto Maquina","Supino Inclinado Maquina","Peck Deck","Crossover Polia Alta","Crossover Polia Baixa","Desenvolvimento Ombro Maquina","Elevacao Lateral Polia","Posterior Ombro Polia","Triceps Testa Polia","Triceps Corda","Triceps Frances Polia"],
+  Pull:  ["Puxada Frontal","Puxada Pegada Fechada","Remada Maquina","Remada Baixa Triangulo","Pulldown Braco Estendido","Face Pull","Rosca Direta Barra W","Rosca Scott","Rosca Martelo","Rosca Polia"],
+  Legs:  ["Agachamento","Leg Press 45","Cadeira Extensora","Mesa Flexora","Leg Curl em Pe","Elevacao Pelvica","Abdutora","Adutora","Panturrilha"],
+  Upper: ["Supino Inclinado Maquina","Crossover Polia Alta","Puxada Frontal","Remada Maquina","Elevacao Lateral Polia","Posterior Ombro Polia","Triceps Corda","Rosca Direta Barra W"],
+  Lower: ["Agachamento","Leg Press 45","Mesa Flexora","Stiff","Elevacao Pelvica","Panturrilha","Abdutora"],
 };
 
-const ABS_LIST = ["Abdominal Máquina","Abdominal Supra","Abdominal Infra","Prancha"];
+const ABS_LIST = ["Abdominal Maquina","Abdominal Supra","Abdominal Infra","Prancha"];
 
 const CARDIO_MAP = {
   Push:  "Esteira 20min",
@@ -31,18 +29,14 @@ const WORKOUT_COLORS = {
   Rest:  { bg: "#2d3436", text: "#636e72" },
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 const formatDate = (dateStr) => {
   const [y, m, d] = dateStr.split("-");
-  return `${d}/${m}/${y}`;
+  return d + "/" + m + "/" + y;
 };
 
 const isCardio  = (ex) => ex.includes("min");
 const isAbs     = (ex) => ex.includes("Abdominal");
 const isPrancha = (ex) => ex === "Prancha";
-
-// ─── Estilos ──────────────────────────────────────────────────────────────────
 
 const styles = {
   root: {
@@ -94,7 +88,6 @@ const styles = {
     color: active ? "#00ff88" : "#444",
     fontSize: 10,
     fontWeight: active ? 700 : 400,
-    transition: "color 0.2s",
   }),
   navDot: (active) => ({
     width: 6,
@@ -112,13 +105,6 @@ const styles = {
     color: "#444",
     textTransform: "uppercase",
     marginBottom: 12,
-  },
-  card: {
-    background: "#161616",
-    borderRadius: 16,
-    border: "1px solid #1e1e1e",
-    padding: "16px 18px",
-    marginBottom: 10,
   },
   todayCard: {
     background: "linear-gradient(135deg, #0d2818 0%, #0d1f1a 100%)",
@@ -140,12 +126,10 @@ const styles = {
     fontSize: 16,
     cursor: "pointer",
     marginTop: 14,
-    letterSpacing: "0.3px",
   },
   workoutChip: (w) => ({
     display: "inline-flex",
     alignItems: "center",
-    gap: 6,
     padding: "10px 16px",
     borderRadius: 50,
     background: WORKOUT_COLORS[w]?.bg || "#1e1e1e",
@@ -158,10 +142,9 @@ const styles = {
   exCard: (done) => ({
     background: done ? "#0d1f18" : "#161616",
     borderRadius: 14,
-    border: `1px solid ${done ? "#1a3a28" : "#1e1e1e"}`,
+    border: "1px solid " + (done ? "#1a3a28" : "#1e1e1e"),
     marginBottom: 10,
     overflow: "hidden",
-    transition: "border-color 0.3s",
   }),
   exHeader: {
     display: "flex",
@@ -194,7 +177,7 @@ const styles = {
     gap: 6,
     padding: "7px 12px",
     background: active ? "#001a0d" : "#1a1a1a",
-    border: `1px solid ${active ? "#00ff8840" : "#2a2a2a"}`,
+    border: "1px solid " + (active ? "#00ff8840" : "#2a2a2a"),
     borderRadius: 50,
     color: active ? "#00ff88" : "#555",
     fontSize: 13,
@@ -206,20 +189,19 @@ const styles = {
     width: 34,
     height: 34,
     borderRadius: 10,
-    border: `2px solid ${done ? "#00ff88" : "#2a2a2a"}`,
+    border: "2px solid " + (done ? "#00ff88" : "#2a2a2a"),
     background: done ? "#00ff8820" : "transparent",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: 16,
+    fontSize: 13,
     flexShrink: 0,
     color: "#00ff88",
   }),
   ytLink: {
     display: "inline-flex",
     alignItems: "center",
-    gap: 4,
     fontSize: 11,
     color: "#555",
     textDecoration: "none",
@@ -277,15 +259,13 @@ const styles = {
     padding: "8px 0",
     borderRadius: 12,
     background: active ? "#1e1e1e" : "transparent",
-    border: `1px solid ${active ? "#2a2a2a" : "transparent"}`,
+    border: "1px solid " + (active ? "#2a2a2a" : "transparent"),
   }),
 };
 
-// ─── App ──────────────────────────────────────────────────────────────────────
-
 export default function App() {
-  const today   = new Date();
-  const dateStr = today.toISOString().split("T")[0];
+  const today    = new Date();
+  const dateStr  = today.toISOString().split("T")[0];
   const todayDay = SPLIT[today.getDay()];
 
   const [tab,           setTab]           = useState("home");
@@ -294,9 +274,8 @@ export default function App() {
   const [exerciseState, setExerciseState] = useState({});
   const [activeWorkout, setActiveWorkout] = useState(null);
   const [timers,        setTimers]        = useState({});
-  const [hydrated,      setHydrated]      = useState(false); // ← flag para evitar race condition
+  const [hydrated,      setHydrated]      = useState(false);
 
-  // ── Carrega dados do localStorage uma única vez ───────────────────────────
   useEffect(() => {
     const savedCheckins = JSON.parse(localStorage.getItem("checkins")) || [];
     const savedLogs     = JSON.parse(localStorage.getItem("logs"))     || {};
@@ -310,29 +289,26 @@ export default function App() {
       setActiveWorkout(draft.workout || null);
     }
 
-    setHydrated(true); // sinaliza que o estado inicial foi carregado
+    setHydrated(true);
   }, []);
 
-  // ── Persiste checkins e logs (só após hydration para não sobrescrever) ────
   useEffect(() => {
     if (!hydrated) return;
     localStorage.setItem("checkins", JSON.stringify(checkins));
     localStorage.setItem("logs",     JSON.stringify(logs));
   }, [checkins, logs, hydrated]);
 
-  // ── Autosave do rascunho em tempo real ────────────────────────────────────
   useEffect(() => {
     if (!hydrated) return;
     if (Object.keys(exerciseState).length > 0 || activeWorkout) {
       localStorage.setItem("draftWorkout", JSON.stringify({
         date:    dateStr,
-        workout: activeWorkout,   // ← corrigido: estava faltando activeWorkout nas deps
+        workout: activeWorkout,
         data:    exerciseState,
       }));
     }
-  }, [exerciseState, activeWorkout, hydrated]); // ← activeWorkout incluído
+  }, [exerciseState, activeWorkout, hydrated]);
 
-  // ── Timer ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     const interval = setInterval(() => {
       setTimers((prev) => {
@@ -346,7 +322,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // ── Ações ─────────────────────────────────────────────────────────────────
   const startWorkout = (type) => {
     setActiveWorkout(type);
     if (!checkins.includes(dateStr)) setCheckins([...checkins, dateStr]);
@@ -373,7 +348,7 @@ export default function App() {
       [dateStr]: { workout: workoutToUse, data: exerciseState },
     }));
     localStorage.removeItem("draftWorkout");
-    alert("🔥 Parabéns! Treino finalizado com sucesso!");
+    alert("Parabens! Treino finalizado com sucesso!");
     setExerciseState({});
     setActiveWorkout(null);
     setTab("home");
@@ -405,7 +380,6 @@ export default function App() {
   return (
     <div style={styles.root}>
 
-      {/* ── Header ── */}
       <div style={styles.header}>
         <div style={styles.logo}>
           <span style={{ fontSize: 22 }}>🔥</span>
@@ -416,7 +390,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* ── Páginas ── */}
       {tab === "home" && (
         <HomeTab
           todayDay={todayDay}
@@ -447,16 +420,14 @@ export default function App() {
         <TodosTab workouts={WORKOUTS} absList={ABS_LIST} />
       )}
 
-      {/* ── Nav ── */}
       <nav style={styles.nav}>
         {[
-          { id: "home",   icon: "⌂", label: "Início"     },
-          { id: "treino", icon: "◈", label: "Treino"     },
-          { id: "todos",  icon: "≡", label: "Exercícios" },
-        ].map(({ id, icon, label }) => (
+          { id: "home",   icon: "Casa",       label: "Inicio"     },
+          { id: "treino", icon: "Treino",      label: "Treino"     },
+          { id: "todos",  icon: "Exercicios",  label: "Exercicios" },
+        ].map(({ id, label }) => (
           <button key={id} style={styles.navBtn(tab === id)} onClick={() => setTab(id)}>
-            <span style={{ fontSize: 18 }}>{icon}</span>
-            <span>{label}</span>
+            <span style={{ fontSize: 13 }}>{label}</span>
             <div style={styles.navDot(tab === id)} />
           </button>
         ))}
@@ -465,8 +436,6 @@ export default function App() {
   );
 }
 
-// ─── Home Tab ─────────────────────────────────────────────────────────────────
-
 function HomeTab({ todayDay, workouts, logs, today, onStart, formatDate }) {
   const logEntries = Object.entries(logs).reverse().slice(0, 5);
   const isRest = todayDay === "Rest";
@@ -474,28 +443,26 @@ function HomeTab({ todayDay, workouts, logs, today, onStart, formatDate }) {
   return (
     <div style={styles.page}>
 
-      {/* Cartão do dia */}
       <div style={styles.todayCard}>
         <div style={styles.todayLabel}>Treino de hoje</div>
-        <div style={styles.todayName}>{isRest ? "Descanso 😴" : todayDay}</div>
+        <div style={styles.todayName}>{isRest ? "Descanso" : todayDay}</div>
         {!isRest && (
           <div style={{ marginTop: 8, fontSize: 13, color: "#2d9e60" }}>
-            {workouts[todayDay]?.length} exercícios
-            {["Push","Pull","Upper","Lower"].includes(todayDay) ? " · Abs incluído" : ""}
+            {workouts[todayDay]?.length} exercicios
+            {["Push","Pull","Upper","Lower"].includes(todayDay) ? " + Abs" : ""}
           </div>
         )}
         {!isRest && (
           <button style={styles.primaryBtn} onClick={() => onStart(todayDay)}>
-            Começar treino do dia
+            Comecar treino do dia
           </button>
         )}
       </div>
 
-      {/* Mini semana */}
       <div style={styles.section}>
         <div style={styles.sectionTitle}>Semana</div>
         <div style={styles.weekRow}>
-          {["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"].map((d, i) => {
+          {["Dom","Seg","Ter","Qua","Qui","Sex","Sab"].map((d, i) => {
             const isToday    = today.getDay() === i;
             const dayWorkout = SPLIT[i];
             const color      = WORKOUT_COLORS[dayWorkout];
@@ -511,7 +478,7 @@ function HomeTab({ todayDay, workouts, logs, today, onStart, formatDate }) {
                   fontSize: 9, fontWeight: 800,
                   color: color?.text || "#555",
                 }}>
-                  {dayWorkout === "Rest" ? "—" : dayWorkout.slice(0,2).toUpperCase()}
+                  {dayWorkout === "Rest" ? "-" : dayWorkout.slice(0,2).toUpperCase()}
                 </div>
               </div>
             );
@@ -519,7 +486,6 @@ function HomeTab({ todayDay, workouts, logs, today, onStart, formatDate }) {
         </div>
       </div>
 
-      {/* Outros treinos */}
       <div style={styles.section}>
         <div style={styles.sectionTitle}>Outros treinos</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -531,16 +497,15 @@ function HomeTab({ todayDay, workouts, logs, today, onStart, formatDate }) {
         </div>
       </div>
 
-      {/* Histórico */}
       {logEntries.length > 0 && (
         <div style={styles.section}>
-          <div style={styles.sectionTitle}>Histórico recente</div>
+          <div style={styles.sectionTitle}>Historico recente</div>
           {logEntries.map(([date, val]) => (
             <div key={date} style={styles.histItem}>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>{formatDate(date)}</div>
                 <div style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
-                  {Object.values(val.data || {}).filter((d) => d.done).length} exercícios concluídos
+                  {Object.values(val.data || {}).filter((d) => d.done).length} exercicios concluidos
                 </div>
               </div>
               <span style={styles.badge(val.workout)}>{val.workout}</span>
@@ -552,8 +517,6 @@ function HomeTab({ todayDay, workouts, logs, today, onStart, formatDate }) {
   );
 }
 
-// ─── Treino Tab ───────────────────────────────────────────────────────────────
-
 function TreinoTab({
   workoutToUse, exerciseState, timers, doneCount, totalCount, progressPct,
   fullWorkout, getLast, handleChange, toggleCheck, onSave, onTimer,
@@ -561,7 +524,6 @@ function TreinoTab({
   return (
     <div style={styles.page}>
 
-      {/* Cabeçalho com progresso */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 8 }}>
           <div>
@@ -576,7 +538,7 @@ function TreinoTab({
         <div style={{ height: 4, background: "#1e1e1e", borderRadius: 99, overflow: "hidden" }}>
           <div style={{
             height: "100%",
-            width: `${progressPct}%`,
+            width: progressPct + "%",
             background: "linear-gradient(90deg, #00ff88, #00c8a0)",
             borderRadius: 99,
             transition: "width 0.4s ease",
@@ -584,7 +546,6 @@ function TreinoTab({
         </div>
       </div>
 
-      {/* Exercícios */}
       {fullWorkout().map((ex) => {
         const last    = getLast(ex);
         const done    = !!exerciseState[ex]?.done;
@@ -600,24 +561,24 @@ function TreinoTab({
                 <div style={styles.exName}>{ex}</div>
                 {last && (
                   <div style={styles.lastSet}>
-                    Último:{" "}
-                    {last.weight ? `${last.weight}kg` : ""}
-                    {last.reps   ? ` × ${last.reps}`  : ""}
-                    {last.time   ? ` ${last.time}s`   : ""}
+                    {"Ultimo: "}
+                    {last.weight ? last.weight + "kg" : ""}
+                    {last.reps   ? " x " + last.reps  : ""}
+                    {last.time   ? " " + last.time + "s" : ""}
                   </div>
                 )}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 
-                  href={`https://www.youtube.com/results?search_query=${ex}`}
+                  href={"https://www.youtube.com/results?search_query=" + ex}
                   target="_blank"
                   rel="noreferrer"
                   style={styles.ytLink}
                 >
-                  ▶
+                  Ver
                 </a>
                 <button style={styles.checkBtn(done)} onClick={() => toggleCheck(ex)}>
-                 {done ? "OK" : ""}
+                  {done ? "OK" : ""}
                 </button>
               </div>
             </div>
@@ -660,7 +621,7 @@ function TreinoTab({
                 )}
 
                 <button style={styles.timerPill(timer > 0)} onClick={() => onTimer(ex)}>
-                  ⏱ {timer > 0 ? `${timer}s` : "90s"}
+                  {timer > 0 ? timer + "s" : "90s"}
                 </button>
               </div>
             )}
@@ -669,27 +630,25 @@ function TreinoTab({
       })}
 
       <button style={styles.finishBtn} onClick={onSave}>
-        🔥 Finalizar treino
+        Finalizar treino
       </button>
     </div>
   );
 }
 
-// ─── Todos Tab ────────────────────────────────────────────────────────────────
-
 function TodosTab({ workouts, absList }) {
   const [open, setOpen] = useState(null);
-  const groups = [...Object.keys(workouts), "Abdômen"];
+  const groups = [...Object.keys(workouts), "Abdomen"];
 
   return (
     <div style={styles.page}>
       <div style={{ marginBottom: 20 }}>
-        <div style={styles.sectionTitle}>Todos os exercícios</div>
+        <div style={styles.sectionTitle}>Todos os exercicios</div>
         <div style={{ fontSize: 13, color: "#444" }}>Toque em um grupo para expandir</div>
       </div>
 
       {groups.map((day) => {
-        const exercises = day === "Abdômen" ? absList : workouts[day];
+        const exercises = day === "Abdomen" ? absList : workouts[day];
         const isOpen    = open === day;
         const color     = WORKOUT_COLORS[day];
 
@@ -705,7 +664,7 @@ function TodosTab({ workouts, absList }) {
                 padding: "16px 18px",
                 background: "#161616",
                 border: "1px solid #1e1e1e",
-                borderRadius: isOpen ? "14px 14px 0 0" : 14,
+                borderRadius: isOpen ? "14px 14px 0 0" : "14px",
                 cursor: "pointer",
                 color: "#f0f0f0",
               }}
@@ -718,18 +677,13 @@ function TodosTab({ workouts, absList }) {
                   fontSize: 11, fontWeight: 800,
                   color: color?.text || "#fff",
                 }}>
-                  {day === "Abdômen" ? "AB" : day.slice(0,2).toUpperCase()}
+                  {day === "Abdomen" ? "AB" : day.slice(0,2).toUpperCase()}
                 </div>
                 <span style={{ fontWeight: 700, fontSize: 15 }}>{day}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: 12, color: "#444" }}>{exercises.length} ex.</span>
-                <span style={{
-                  color: "#444", fontSize: 18,
-                  display: "inline-block",
-                  transform: isOpen ? "rotate(90deg)" : "none",
-                  transition: "transform 0.2s",
-                }}>›</span>
+                <span style={{ color: "#444", fontSize: 18 }}>{isOpen ? "v" : ">"}</span>
               </div>
             </button>
 
@@ -748,12 +702,12 @@ function TodosTab({ workouts, absList }) {
                   }}>
                     <span style={{ fontSize: 13, color: "#ccc" }}>{ex}</span>
                     
-                      href={`https://www.youtube.com/results?search_query=${ex}`}
+                      href={"https://www.youtube.com/results?search_query=" + ex}
                       target="_blank"
                       rel="noreferrer"
-                      style={{ ...styles.ytLink, fontSize: 12 }}
+                      style={styles.ytLink}
                     >
-                      ▶ Ver
+                      Ver
                     </a>
                   </div>
                 ))}
