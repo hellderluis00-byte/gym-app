@@ -10,7 +10,6 @@
   "dependencies": {
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest",
-    "recharts": "^2.8.0"
+    "react-dom": "latest"
   }
 }
