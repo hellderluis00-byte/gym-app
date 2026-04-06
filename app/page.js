@@ -617,7 +617,7 @@ function TreinoTab({
                   ▶
                 </a>
                 <button style={styles.checkBtn(done)} onClick={() => toggleCheck(ex)}>
-                  {done ? "✓" : ""}
+                 {done ? "OK" : ""}
                 </button>
               </div>
             </div>
