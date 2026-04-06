@@ -486,7 +486,7 @@ function HomeTab({ todayDay, workouts, logs, today, onStart, formatDate }) {
         )}
         {!isRest && (
           <button style={styles.primaryBtn} onClick={() => onStart(todayDay)}>
-            Começar treino do dia →
+            Começar treino do dia
           </button>
         )}
       </div>
