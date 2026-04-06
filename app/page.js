@@ -574,7 +574,7 @@ function TreinoTab({
                   target="_blank"
                   rel="noreferrer"
                   style={styles.ytLink}
-                >
+        
                   Ver
                 </a>
                 <button style={styles.checkBtn(done)} onClick={() => toggleCheck(ex)}>
