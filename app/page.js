@@ -4,11 +4,48 @@ import { useState, useEffect } from "react";
 var SPLIT = ["Rest", "PushA", "PullA", "Legs", "PushB", "PullB", "Rest"];
 
 var WORKOUTS = {
-  PushA: ["Supino Reto Maquina", "Supino Inclinado Maquina", "Desenvolvimento Ombro Maquina", "Elevacao Lateral Polia", "Triceps Corda", "Triceps Testa Polia"],
-  PullA: ["Puxada Frontal", "Remada Maquina", "Pulldown Braco Estendido", "Face Pull", "Rosca Direta Barra W", "Rosca Martelo"],
-  Legs:  ["Agachamento", "Leg Press 45", "Cadeira Extensora", "Mesa Flexora", "Elevacao Pelvica", "Panturrilha"],
-  PushB: ["Peck Deck", "Crossover Polia Alta", "Crossover Polia Baixa", "Posterior Ombro Polia", "Triceps Frances Polia", "Desenvolvimento Ombro Maquina"],
-  PullB: ["Puxada Pegada Fechada", "Remada Baixa Triangulo", "Remada Maquina", "Face Pull", "Rosca Scott", "Rosca Polia"],
+  PushA: [
+    "Supino Inclinado Maquina",
+    "Crucifixo Maquina",
+    "Desenvolvimento Ombro Maquina",
+    "Elevacao Lateral Polia",
+    "Triceps Corda",
+    "Triceps Testa Polia",
+  ],
+  PullA: [
+    "Puxada Frontal",
+    "Remada Maquina",
+    "Remada Unilateral Maquina",
+    "Remada Cavalinho",
+    "Rosca Direta Barra W",
+    "Rosca Martelo Maquina",
+  ],
+  Legs: [
+    "Agachamento",
+    "Leg Press 45",
+    "Cadeira Extensora",
+    "Mesa Flexora",
+    "Abdutora",
+    "Adutora",
+    "Panturrilha",
+  ],
+  PushB: [
+    "Peck Deck",
+    "Crossover Polia Alta",
+    "Crossover Polia Baixa",
+    "Posterior Ombro Polia",
+    "Elevacao Lateral Maquina",
+    "Triceps Frances Polia",
+  ],
+  PullB: [
+    "Puxada Pegada Fechada",
+    "Remada Baixa Triangulo",
+    "Remada Unilateral Maquina",
+    "Remada Cavalinho",
+    "Elevacao Pelvica",
+    "Rosca Scott",
+    "Rosca Polia",
+  ],
 };
 
 var ABS_DAYS = ["PushB", "PullB"];
@@ -42,9 +79,9 @@ var WORKOUT_LABELS = {
 var MUSCLES = {
   PushA: "Peito + Ombro + Triceps",
   PullA: "Costas + Biceps",
-  Legs:  "Quadriceps + Posterior + Gluteo",
+  Legs:  "Pernas + Gluteo",
   PushB: "Peito + Ombro + Triceps",
-  PullB: "Costas + Biceps",
+  PullB: "Costas + Gluteo + Biceps",
 };
 
 function isCardio(ex)  { return ex.includes("min"); }
@@ -103,35 +140,21 @@ function timerSt(active) {
 function checkSt(done) {
   return { width: 32, height: 32, borderRadius: 8, border: "2px solid " + (done ? GREEN : BORD2), background: done ? "#00ff8815" : "transparent", cursor: "pointer", color: GREEN, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
 }
-var inputSt   = { width: "100%", padding: "8px 10px", background: BG, border: "1px solid " + BORD2, borderRadius: 8, color: TEXT, fontSize: 13, fontWeight: 600, textAlign: "center", outline: "none", boxSizing: "border-box" };
-var ytSt      = { fontSize: 10, color: MUTED, textDecoration: "none", padding: "3px 8px", borderRadius: 6, background: SURF2 };
-var secTitle  = { fontSize: 10, fontWeight: 700, letterSpacing: "1.5px", color: MUTED, textTransform: "uppercase", display: "block", marginBottom: 10 };
-var pageSt    = { padding: "16px 14px" };
+var inputSt  = { width: "100%", padding: "8px 10px", background: BG, border: "1px solid " + BORD2, borderRadius: 8, color: TEXT, fontSize: 13, fontWeight: 600, textAlign: "center", outline: "none", boxSizing: "border-box" };
+var ytSt     = { fontSize: 10, color: MUTED, textDecoration: "none", padding: "3px 8px", borderRadius: 6, background: SURF2 };
+var secTitle = { fontSize: 10, fontWeight: 700, letterSpacing: "1.5px", color: MUTED, textTransform: "uppercase", display: "block", marginBottom: 10 };
+var pageSt   = { padding: "16px 14px" };
 
 export default function App() {
   var today   = new Date();
   var dateStr = today.toISOString().split("T")[0];
   var todayW  = SPLIT[today.getDay()];
 
-  var stateTab      = useState("home");
-  var tab           = stateTab[0];
-  var setTab        = stateTab[1];
-
-  var stateLogs     = useState({});
-  var logs          = stateLogs[0];
-  var setLogs       = stateLogs[1];
-
-  var stateDraft    = useState({ workout: null, data: {} });
-  var draft         = stateDraft[0];
-  var setDraft      = stateDraft[1];
-
-  var stateTimers   = useState({});
-  var timers        = stateTimers[0];
-  var setTimers     = stateTimers[1];
-
-  var stateHydrated = useState(false);
-  var hydrated      = stateHydrated[0];
-  var setHydrated   = stateHydrated[1];
+  var s0 = useState("home");       var tab = s0[0];      var setTab = s0[1];
+  var s1 = useState({});           var logs = s1[0];     var setLogs = s1[1];
+  var s2 = useState({ workout: null, data: {} }); var draft = s2[0]; var setDraft = s2[1];
+  var s3 = useState({});           var timers = s3[0];   var setTimers = s3[1];
+  var s4 = useState(false);        var hydrated = s4[0]; var setHydrated = s4[1];
 
   useEffect(function() {
     var l = JSON.parse(localStorage.getItem("logs_v2")) || {};
@@ -197,7 +220,7 @@ export default function App() {
     });
     localStorage.removeItem("draft_v2");
     setDraft({ workout: null, data: {} });
-    alert("Treino salvo com sucesso!");
+    alert("Treino salvo!");
     setTab("home");
   }
 
@@ -276,16 +299,12 @@ function HomeTab(props) {
   var d = new Date(today);
   for (var i = 0; i < 30; i++) {
     var ds = d.toISOString().split("T")[0];
-    if (logs[ds]) {
-      streak++;
-    } else if (i > 0) {
-      break;
-    }
+    if (logs[ds]) { streak++; } else if (i > 0) { break; }
     d.setDate(d.getDate() - 1);
   }
 
   var thisWeek = Object.keys(logs).filter(function(dl) {
-    var ld = new Date(dl + "T12:00:00");
+    var ld  = new Date(dl + "T12:00:00");
     var now = new Date();
     var sow = new Date(now);
     sow.setDate(now.getDate() - now.getDay());
@@ -306,7 +325,7 @@ function HomeTab(props) {
           <div style={{ fontSize: 12, color: "#2d9e60", marginTop: 4 }}>{MUSCLES[todayW]}</div>
         )}
         {!isRest && (
-          <div style={{ fontSize: 11, color: "#1a6e40", marginTop: 2 }}>3-4 series de 10-12 reps - 45 a 60 min</div>
+          <div style={{ fontSize: 11, color: "#1a6e40", marginTop: 2 }}>3 series de 10-12 reps - 45 a 60 min</div>
         )}
         {!isRest && (
           <button style={{ width: "100%", padding: "14px", background: GREEN, border: "none", borderRadius: 12, color: "#0a0a0a", fontWeight: 800, fontSize: 15, cursor: "pointer", marginTop: 14 }} onClick={function() { onStart(todayW); }}>
@@ -410,7 +429,7 @@ function TreinoTab(props) {
         var cardio  = isCardio(ex);
         var abs     = isAbs(ex);
         var prancha = isPrancha(ex);
-        var ytUrl   = "https://www.youtube.com/results?search_query=" + encodeURIComponent(ex + " execucao");
+        var ytUrl   = "https://www.youtube.com/results?search_query=" + encodeURIComponent(ex + " como fazer");
         var curW    = data[ex] && data[ex].weight ? parseFloat(data[ex].weight) : null;
         var newRec  = curW && rec && curW > rec;
 
@@ -481,17 +500,9 @@ function AgendaTab(props) {
   var logs  = props.logs;
   var today = props.today;
 
-  var stateYear  = useState(today.getFullYear());
-  var year       = stateYear[0];
-  var setYear    = stateYear[1];
-
-  var stateMonth = useState(today.getMonth());
-  var month      = stateMonth[0];
-  var setMonth   = stateMonth[1];
-
-  var stateSel   = useState(null);
-  var selected   = stateSel[0];
-  var setSelected= stateSel[1];
+  var sy = useState(today.getFullYear()); var year = sy[0]; var setYear = sy[1];
+  var sm = useState(today.getMonth());    var month = sm[0]; var setMonth = sm[1];
+  var ss = useState(null);               var selected = ss[0]; var setSelected = ss[1];
 
   var monthNames = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
   var days     = getDaysInMonth(year, month);
@@ -536,9 +547,9 @@ function AgendaTab(props) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 3, marginBottom: 16 }}>
         {cells.map(function(day, idx) {
           if (!day) return <div key={idx} />;
-          var ds   = getDateStr(day);
-          var log  = logs[ds];
-          var wc   = log ? (WORKOUT_COLORS[log.workout] || { bg: GREEN, text: "#000" }) : null;
+          var ds      = getDateStr(day);
+          var log     = logs[ds];
+          var wc      = log ? (WORKOUT_COLORS[log.workout] || { bg: GREEN, text: "#000" }) : null;
           var isToday = ds === todayStr;
           var isSel   = selected === day;
           return (
@@ -598,10 +609,7 @@ function AgendaTab(props) {
 
 function RecordsTab(props) {
   var logs = props.logs;
-
-  var stateFilter = useState("todos");
-  var filter      = stateFilter[0];
-  var setFilter   = stateFilter[1];
+  var sf = useState("todos"); var filter = sf[0]; var setFilter = sf[1];
 
   var allExercises = [];
   Object.values(WORKOUTS).forEach(function(list) {
@@ -671,16 +679,16 @@ function RecordsTab(props) {
       </div>
 
       {filtered.length === 0 && (
-        <div style={{ textAlign: "center", color: MUTED, fontSize: 13, marginTop: 40, lineHeight: 1.6 }}>
-          Nenhum registro ainda.{"\n"}Complete alguns treinos para ver seus records aqui!
+        <div style={{ textAlign: "center", color: MUTED, fontSize: 13, marginTop: 40, lineHeight: 1.8 }}>
+          Nenhum registro ainda. Complete alguns treinos para ver seus records aqui!
         </div>
       )}
 
       {filtered.map(function(ex) {
-        var rec  = records[ex];
-        var hist = history[ex] || [];
-        var last = hist[hist.length - 1];
-        var prev = hist.length >= 2 ? hist[hist.length - 2] : null;
+        var rec      = records[ex];
+        var hist     = history[ex] || [];
+        var last     = hist[hist.length - 1];
+        var prev     = hist.length >= 2 ? hist[hist.length - 2] : null;
         var improved = prev && last && last.weight && prev.weight && parseFloat(last.weight) > parseFloat(prev.weight);
 
         return (
