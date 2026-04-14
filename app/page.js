@@ -1,98 +1,128 @@
 "use client";
 import { useState, useEffect } from "react";
 
-var SPLIT = ["Rest", "PushA", "PullA", "Legs", "PushB", "PullB", "Rest"];
+var SPLIT = ["Rest", "Push", "Pull", "Legs", "Upper", "Lower", "Rest"];
 
 var WORKOUTS = {
-  PushA: [
+  Push: [
+    "Supino Reto Maquina",
     "Supino Inclinado Maquina",
-    "Crucifixo Maquina",
+    "Crucifixo Maquina Peck Deck",
     "Desenvolvimento Ombro Maquina",
-    "Elevacao Lateral Polia",
-    "Triceps Corda",
-    "Triceps Testa Polia",
+    "Elevacao Lateral Cabo",
+    "Elevacao Frontal Cabo",
+    "Triceps Polia Barra Reta",
+    "Triceps Frances Polia",
+    "Triceps Polia Corda",
   ],
-  PullA: [
-    "Puxada Frontal",
-    "Remada Maquina",
-    "Remada Unilateral Maquina",
-    "Remada Cavalinho",
-    "Rosca Direta Barra W",
+  Pull: [
+    "Puxada Anatomica Supinada",
+    "Puxada Unilateral Cabo",
+    "Puxada Aberta Maquina",
+    "Remada Cavalinho Maquina",
+    "Remada Baixa Triangulo Cabo",
+    "Remada Unilateral Cabo",
+    "Peck Deck Invertido Posterior",
+    "Rosca Direta Barra",
+    "Rosca Scott Maquina",
     "Rosca Martelo Maquina",
+    "Rosca Concentrada Cabo",
   ],
   Legs: [
-    "Agachamento",
     "Leg Press 45",
+    "Agachamento Hack Maquina",
     "Cadeira Extensora",
-    "Mesa Flexora",
-    "Abdutora",
-    "Adutora",
-    "Panturrilha",
+    "Cadeira Flexora Deitado",
+    "Stiff Maquina",
+    "Abdutora Maquina",
+    "Adutora Maquina",
+    "Panturrilha em Pe Maquina",
+    "Panturrilha Sentado Maquina",
   ],
-  PushB: [
-    "Peck Deck",
-    "Crossover Polia Alta",
-    "Crossover Polia Baixa",
-    "Posterior Ombro Polia",
-    "Elevacao Lateral Maquina",
-    "Triceps Frances Polia",
+  Upper: [
+    "Supino Declinado Maquina",
+    "Crossover Cabo Cruzamento",
+    "Remada Maquina Hammer",
+    "Pullover Maquina",
+    "Elevacao Lateral Cabo Unilateral",
+    "Face Pull Cabo Corda",
+    "Abdominal Crunch Maquina",
+    "Elevacao de Pernas",
+    "Prancha Isometrica",
+    "Obliquo Cabo Rotacao",
   ],
-  PullB: [
-    "Puxada Pegada Fechada",
-    "Remada Baixa Triangulo",
-    "Remada Unilateral Maquina",
-    "Remada Cavalinho",
-    "Elevacao Pelvica",
-    "Rosca Scott",
-    "Rosca Polia",
+  Lower: [
+    "Agachamento Smith",
+    "Cadeira Flexora Sentado",
+    "Hip Thrust Maquina",
+    "Stiff Maquina",
+    "Abdutora Maquina",
+    "Adutora Maquina",
+    "Abdominal Cabo Ajoelhado",
+    "Abdominal Infra Banco",
+    "Russian Twist com Peso",
   ],
 };
 
-var ABS_DAYS = ["PushB", "PullB"];
-var ABS_LIST = ["Abdominal Maquina", "Abdominal Supra", "Abdominal Infra", "Prancha"];
-
-var CARDIO_MAP = {
-  PushA: "Esteira 15min",
-  PullA: "Bike 15min",
-  Legs:  "Esteira 15min",
-  PullB: "Bike 15min",
+var TIPS = {
+  Push: "No supino maquina, pause 1 segundo no ponto de maior estiramento antes de empurrar. Isso recruta mais fibras do peitoral. Descanso: 90s a 2min nos compostos, 60s nos isolamentos.",
+  Pull: "Costas: pense em cotovelo, nao em mao. Puxe sempre com o cotovelo para nao roubar com o biceps. No Drag Curl: mantenha a barra encostada no corpo, cotovelos vao para tras.",
+  Legs: "Leg Press: pes no meio para carga maxima. Hack: pes mais proximos para atacar o vasto medial. Nos dois: desça ate 90 graus ou mais fundo se o joelho permitir.",
+  Upper: "Face Pull e o exercicio mais subestimado da academia. Ele equilibra o ombro, melhora postura e protege o manguito rotador. Nunca pule esse exercicio.",
+  Lower: "Hip Thrust e o exercicio numero 1 para gluteo. Se a academia nao tiver maquina, use a barra no banco com uma anilha. No abdomen: progrida carga e volume, nao faca infinitas repeticoes.",
 };
+
+var PROTOCOL = [
+  "3 a 4 series de trabalho por exercicio",
+  "8 a 15 reps conforme o exercicio",
+  "Descanso compostos: 90s a 2 minutos",
+  "Descanso isolamento: 60 segundos",
+  "Velocidade excentrica: 2 a 3 segundos descendo",
+  "RPE alvo: 8 a 9 de 10, deixa 1 a 2 reps na reserva",
+  "Cardio opcional: 20 min LISS pos-treino",
+];
+
+var PROGRESSION = [
+  "Completou todas as series com boa tecnica: aumente 2,5kg na proxima semana",
+  "Nao completou todas as reps: mantenha o peso, foque na tecnica",
+  "A cada 4 semanas: 1 semana de deload, reduza volume em 40% e mantenha a carga",
+  "Priorize sobrecarga progressiva acima de qualquer outra variavel",
+  "Dor muscular nao e indicador de progresso. Carga e volume sao.",
+];
 
 var WORKOUT_COLORS = {
-  PushA: { bg: "#ff6b35", text: "#fff" },
-  PullA: { bg: "#4ecdc4", text: "#0a0a0a" },
-  Legs:  { bg: "#a29bfe", text: "#0a0a0a" },
-  PushB: { bg: "#fd79a8", text: "#0a0a0a" },
-  PullB: { bg: "#00cec9", text: "#0a0a0a" },
+  Push:  { bg: "#ff6b35", text: "#fff" },
+  Pull:  { bg: "#4ecdc4", text: "#0a0a0a" },
+  Legs:  { bg: "#00b894", text: "#0a0a0a" },
+  Upper: { bg: "#a29bfe", text: "#0a0a0a" },
+  Lower: { bg: "#fdcb6e", text: "#0a0a0a" },
   Rest:  { bg: "#2d3436", text: "#636e72" },
 };
 
 var WORKOUT_LABELS = {
-  PushA: "Push A",
-  PullA: "Pull A",
-  Legs:  "Pernas",
-  PushB: "Push B",
-  PullB: "Pull B",
+  Push:  "Push",
+  Pull:  "Pull",
+  Legs:  "Legs",
+  Upper: "Upper",
+  Lower: "Lower",
   Rest:  "Descanso",
 };
 
 var MUSCLES = {
-  PushA: "Peito + Ombro + Triceps",
-  PullA: "Costas + Biceps",
-  Legs:  "Pernas + Gluteo",
-  PushB: "Peito + Ombro + Triceps",
-  PullB: "Costas + Gluteo + Biceps",
+  Push:  "Peito + Ombro + Triceps",
+  Pull:  "Costas + Biceps + Ombro Post.",
+  Legs:  "Pernas + Gluteo + Panturrilha",
+  Upper: "Peito + Costas + Ombro + Abdomen",
+  Lower: "Pernas variacao + Gluteo + Abdomen",
 };
 
 function isCardio(ex)  { return ex.includes("min"); }
-function isAbs(ex)     { return ex.includes("Abdominal"); }
-function isPrancha(ex) { return ex === "Prancha"; }
+function isAbs(ex)     { return ex.includes("Abdominal") || ex.includes("Russian") || ex.includes("Obliquo"); }
+function isPrancha(ex) { return ex.includes("Prancha"); }
+function isElevacao(ex){ return ex === "Elevacao de Pernas"; }
 
 function getFullWorkout(w) {
-  var base = WORKOUTS[w] ? WORKOUTS[w].slice() : [];
-  if (ABS_DAYS.includes(w)) base = base.concat(ABS_LIST);
-  if (CARDIO_MAP[w]) base = base.concat([CARDIO_MAP[w]]);
-  return base;
+  return WORKOUTS[w] ? WORKOUTS[w].slice() : [];
 }
 
 function fmtDate(dateStr) {
@@ -116,6 +146,8 @@ var BORD2   = "#2a2a2a";
 var GREEN   = "#00ff88";
 var TEXT    = "#f0f0f0";
 var MUTED   = "#555";
+var YELLOW  = "#fdcb6e";
+var ORANGE  = "#ff6b35";
 
 function navBtnSt(active) {
   return { flex: 1, padding: "12px 0 8px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: active ? GREEN : MUTED, fontSize: 10, fontWeight: active ? 700 : 400 };
@@ -150,11 +182,11 @@ export default function App() {
   var dateStr = today.toISOString().split("T")[0];
   var todayW  = SPLIT[today.getDay()];
 
-  var s0 = useState("home");       var tab = s0[0];      var setTab = s0[1];
-  var s1 = useState({});           var logs = s1[0];     var setLogs = s1[1];
-  var s2 = useState({ workout: null, data: {} }); var draft = s2[0]; var setDraft = s2[1];
-  var s3 = useState({});           var timers = s3[0];   var setTimers = s3[1];
-  var s4 = useState(false);        var hydrated = s4[0]; var setHydrated = s4[1];
+  var s0 = useState("home");                      var tab = s0[0];      var setTab = s0[1];
+  var s1 = useState({});                          var logs = s1[0];     var setLogs = s1[1];
+  var s2 = useState({ workout: null, data: {} }); var draft = s2[0];    var setDraft = s2[1];
+  var s3 = useState({});                          var timers = s3[0];   var setTimers = s3[1];
+  var s4 = useState(false);                       var hydrated = s4[0]; var setHydrated = s4[1];
 
   useEffect(function() {
     var l = JSON.parse(localStorage.getItem("logs_v2")) || {};
@@ -267,10 +299,10 @@ export default function App() {
         )}
       </div>
 
-      {tab === "home"    && <HomeTab    today={today} todayW={todayW} logs={logs} draft={draft} onStart={startWorkout} />}
-      {tab === "treino"  && <TreinoTab  workoutToUse={workoutToUse} data={draft.data} timers={timers} doneCount={doneCount} pct={pct} exercises={exercises} getLast={getLast} getRecord={getRecord} handleChange={handleChange} toggleCheck={toggleCheck} onSave={saveWorkout} onTimer={function(ex) { setTimers(function(p) { var n = Object.assign({}, p); n[ex] = 90; return n; }); }} />}
-      {tab === "agenda"  && <AgendaTab  logs={logs} today={today} />}
-      {tab === "records" && <RecordsTab logs={logs} />}
+      {tab === "home"     && <HomeTab    today={today} todayW={todayW} logs={logs} draft={draft} onStart={startWorkout} />}
+      {tab === "treino"   && <TreinoTab  workoutToUse={workoutToUse} data={draft.data} timers={timers} doneCount={doneCount} pct={pct} exercises={exercises} getLast={getLast} getRecord={getRecord} handleChange={handleChange} toggleCheck={toggleCheck} onSave={saveWorkout} onTimer={function(ex) { setTimers(function(p) { var n = Object.assign({}, p); n[ex] = 90; return n; }); }} />}
+      {tab === "agenda"   && <AgendaTab  logs={logs} today={today} />}
+      {tab === "records"  && <RecordsTab logs={logs} />}
 
       <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#0f0f0f", borderTop: "1px solid " + BORDER, display: "flex", zIndex: 100 }}>
         {["home", "treino", "agenda", "records"].map(function(id) {
@@ -313,19 +345,22 @@ function HomeTab(props) {
   }).length;
 
   var recent = Object.entries(logs).sort(function(a, b) { return a[0] > b[0] ? -1 : 1; }).slice(0, 4);
+  var wc = WORKOUT_COLORS[todayW] || WORKOUT_COLORS.Rest;
 
   return (
     <div style={pageSt}>
       <div style={{ background: "#0d2818", borderRadius: 18, border: "1px solid #1a3a28", padding: "20px 18px", marginBottom: 14 }}>
         <div style={{ fontSize: 10, color: "#2d9e60", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase" }}>Treino de hoje</div>
-        <div style={{ fontSize: 30, fontWeight: 800, color: "#fff", lineHeight: 1.1, marginTop: 4 }}>
+        <div style={{ fontSize: 30, fontWeight: 800, color: isRest ? MUTED : wc.bg, lineHeight: 1.1, marginTop: 4 }}>
           {isRest ? "Descanso" : (WORKOUT_LABELS[todayW] || todayW)}
         </div>
         {!isRest && MUSCLES[todayW] && (
           <div style={{ fontSize: 12, color: "#2d9e60", marginTop: 4 }}>{MUSCLES[todayW]}</div>
         )}
         {!isRest && (
-          <div style={{ fontSize: 11, color: "#1a6e40", marginTop: 2 }}>3 series de 10-12 reps - 45 a 60 min</div>
+          <div style={{ fontSize: 11, color: "#1a6e40", marginTop: 2 }}>
+            {(WORKOUTS[todayW] ? WORKOUTS[todayW].length : 0) + " exercicios - 60 a 75 min"}
+          </div>
         )}
         {!isRest && (
           <button style={{ width: "100%", padding: "14px", background: GREEN, border: "none", borderRadius: 12, color: "#0a0a0a", fontWeight: 800, fontSize: 15, cursor: "pointer", marginTop: 14 }} onClick={function() { onStart(todayW); }}>
@@ -359,6 +394,17 @@ function HomeTab(props) {
             <button key={w} style={chipSt(w)} onClick={function() { onStart(w); }}>
               {WORKOUT_LABELS[w] || w}
             </button>
+          );
+        })}
+      </div>
+
+      <div style={{ background: "#1a1200", borderRadius: 12, border: "1px solid #3a2e00", padding: "14px 16px", marginBottom: 18 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: YELLOW, marginBottom: 8, letterSpacing: "1px", textTransform: "uppercase" }}>Regra de progressao</div>
+        {PROGRESSION.map(function(p, i) {
+          return (
+            <div key={i} style={{ fontSize: 12, color: "#ccc", marginBottom: 5, paddingLeft: 8, borderLeft: "2px solid " + ORANGE }}>
+              {p}
+            </div>
           );
         })}
       </div>
@@ -399,14 +445,16 @@ function TreinoTab(props) {
   var toggleCheck  = props.toggleCheck;
   var onSave       = props.onSave;
   var onTimer      = props.onTimer;
+  var tip          = TIPS[workoutToUse];
+  var wc           = WORKOUT_COLORS[workoutToUse] || { bg: GREEN, text: "#000" };
 
   return (
     <div style={pageSt}>
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 6 }}>
           <div>
             <span style={secTitle}>Em andamento</span>
-            <div style={{ fontSize: 22, fontWeight: 800, lineHeight: 1 }}>{WORKOUT_LABELS[workoutToUse] || workoutToUse}</div>
+            <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1, color: wc.bg }}>{WORKOUT_LABELS[workoutToUse] || workoutToUse}</div>
             {MUSCLES[workoutToUse] && (
               <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>{MUSCLES[workoutToUse]}</div>
             )}
@@ -421,17 +469,25 @@ function TreinoTab(props) {
         </div>
       </div>
 
+      {tip && (
+        <div style={{ background: "#1a1a00", borderRadius: 10, border: "1px solid #3a3800", padding: "12px 14px", marginBottom: 14, display: "flex", gap: 10, alignItems: "flex-start" }}>
+          <span style={{ fontSize: 16, flexShrink: 0 }}>!</span>
+          <div style={{ fontSize: 12, color: "#e0d080", lineHeight: 1.5 }}>{tip}</div>
+        </div>
+      )}
+
       {exercises.map(function(ex) {
         var last    = getLast(ex);
         var rec     = getRecord(ex);
         var done    = !!(data[ex] && data[ex].done);
         var timer   = timers[ex] || 0;
-        var cardio  = isCardio(ex);
         var abs     = isAbs(ex);
         var prancha = isPrancha(ex);
+        var elev    = isElevacao(ex);
         var ytUrl   = "https://www.youtube.com/results?search_query=" + encodeURIComponent(ex + " como fazer");
         var curW    = data[ex] && data[ex].weight ? parseFloat(data[ex].weight) : null;
         var newRec  = curW && rec && curW > rec;
+        var isBodyweight = abs || prancha || elev;
 
         return (
           <div key={ex} style={exCardSt(done)}>
@@ -440,16 +496,16 @@ function TreinoTab(props) {
                 <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                   <span style={{ fontWeight: 700, fontSize: 13, color: TEXT }}>{ex}</span>
                   {newRec && (
-                    <span style={{ fontSize: 9, fontWeight: 800, color: "#fdcb6e", background: "#2a2000", padding: "2px 6px", borderRadius: 50 }}>RECORD</span>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: YELLOW, background: "#2a2000", padding: "2px 6px", borderRadius: 50 }}>RECORD</span>
                   )}
                 </div>
                 {last && (
                   <div style={{ fontSize: 10, color: MUTED, marginTop: 2 }}>
-                    {"Ultimo: " + (last.weight ? last.weight + "kg" : "") + (last.reps ? " x " + last.reps + " reps" : "") + (last.time ? last.time + "s" : "")}
+                    {"Ultimo: " + (last.weight ? last.weight + "kg" : "") + (last.reps ? " x " + last.reps + " reps" : "") + (last.time ? " " + last.time + "s" : "")}
                   </div>
                 )}
                 {rec && (
-                  <div style={{ fontSize: 10, color: "#fdcb6e", marginTop: 1 }}>{"Record: " + rec + "kg"}</div>
+                  <div style={{ fontSize: 10, color: YELLOW, marginTop: 1 }}>{"Record: " + rec + "kg"}</div>
                 )}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -460,36 +516,51 @@ function TreinoTab(props) {
               </div>
             </div>
 
-            {!cardio && (
-              <div style={{ padding: "0 14px 12px", display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
-                {!abs && !prancha && (
-                  <div style={{ display: "flex", gap: 6, flex: 1 }}>
-                    <div style={{ flex: 1 }}>
-                      <input style={inputSt} type="number" placeholder="0" defaultValue={(data[ex] && data[ex].weight) || ""} onChange={function(e) { handleChange(ex, "weight", e.target.value); }} />
-                      <div style={{ fontSize: 9, color: MUTED, textAlign: "center", marginTop: 2 }}>kg</div>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <input style={inputSt} type="number" placeholder="0" defaultValue={(data[ex] && data[ex].reps) || ""} onChange={function(e) { handleChange(ex, "reps", e.target.value); }} />
-                      <div style={{ fontSize: 9, color: MUTED, textAlign: "center", marginTop: 2 }}>reps</div>
-                    </div>
+            <div style={{ padding: "0 14px 12px", display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
+              {!isBodyweight && (
+                <div style={{ display: "flex", gap: 6, flex: 1 }}>
+                  <div style={{ flex: 1 }}>
+                    <input style={inputSt} type="number" placeholder="0" defaultValue={(data[ex] && data[ex].weight) || ""} onChange={function(e) { handleChange(ex, "weight", e.target.value); }} />
+                    <div style={{ fontSize: 9, color: MUTED, textAlign: "center", marginTop: 2 }}>kg</div>
                   </div>
-                )}
-                {(abs || prancha) && (
                   <div style={{ flex: 1 }}>
                     <input style={inputSt} type="number" placeholder="0" defaultValue={(data[ex] && data[ex].reps) || ""} onChange={function(e) { handleChange(ex, "reps", e.target.value); }} />
-                    <div style={{ fontSize: 9, color: MUTED, textAlign: "center", marginTop: 2 }}>{prancha ? "segundos" : "reps"}</div>
+                    <div style={{ fontSize: 9, color: MUTED, textAlign: "center", marginTop: 2 }}>reps</div>
                   </div>
-                )}
-                <button style={timerSt(timer > 0)} onClick={function() { onTimer(ex); }}>
-                  {timer > 0 ? timer + "s" : "90s"}
-                </button>
-              </div>
-            )}
+                </div>
+              )}
+              {(abs || elev) && (
+                <div style={{ flex: 1 }}>
+                  <input style={inputSt} type="number" placeholder="0" defaultValue={(data[ex] && data[ex].reps) || ""} onChange={function(e) { handleChange(ex, "reps", e.target.value); }} />
+                  <div style={{ fontSize: 9, color: MUTED, textAlign: "center", marginTop: 2 }}>reps</div>
+                </div>
+              )}
+              {prancha && (
+                <div style={{ flex: 1 }}>
+                  <input style={inputSt} type="number" placeholder="0" defaultValue={(data[ex] && data[ex].time) || ""} onChange={function(e) { handleChange(ex, "time", e.target.value); }} />
+                  <div style={{ fontSize: 9, color: MUTED, textAlign: "center", marginTop: 2 }}>segundos</div>
+                </div>
+              )}
+              <button style={timerSt(timer > 0)} onClick={function() { onTimer(ex); }}>
+                {timer > 0 ? timer + "s" : "90s"}
+              </button>
+            </div>
           </div>
         );
       })}
 
-      <button style={{ width: "100%", padding: "16px", background: GREEN, border: "none", borderRadius: 14, color: "#0a0a0a", fontWeight: 800, fontSize: 16, cursor: "pointer", marginTop: 8 }} onClick={onSave}>
+      <div style={{ background: "#0d1a10", borderRadius: 10, border: "1px solid #1a3a20", padding: "12px 14px", marginBottom: 14 }}>
+        <div style={{ fontSize: 10, fontWeight: 800, color: GREEN, marginBottom: 8, letterSpacing: "1px", textTransform: "uppercase" }}>Protocolo do treino</div>
+        {PROTOCOL.map(function(p, i) {
+          return (
+            <div key={i} style={{ fontSize: 11, color: "#aaa", marginBottom: 4, paddingLeft: 8, borderLeft: "2px solid " + GREEN }}>
+              {p}
+            </div>
+          );
+        })}
+      </div>
+
+      <button style={{ width: "100%", padding: "16px", background: GREEN, border: "none", borderRadius: 14, color: "#0a0a0a", fontWeight: 800, fontSize: 16, cursor: "pointer", marginTop: 4 }} onClick={onSave}>
         Finalizar e salvar treino
       </button>
     </div>
@@ -592,7 +663,7 @@ function AgendaTab(props) {
                   <div key={ex} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid " + BORDER }}>
                     <span style={{ fontSize: 12, color: val.done ? TEXT : MUTED }}>{ex}</span>
                     <span style={{ fontSize: 12, color: GREEN, fontWeight: 700 }}>
-                      {(val.weight ? val.weight + "kg" : "") + (val.reps ? " x " + val.reps : "") + (val.time ? val.time + "s" : "")}
+                      {(val.weight ? val.weight + "kg" : "") + (val.reps ? " x " + val.reps : "") + (val.time ? " " + val.time + "s" : "")}
                     </span>
                   </div>
                 );
@@ -617,9 +688,6 @@ function RecordsTab(props) {
       if (allExercises.indexOf(ex) === -1) allExercises.push(ex);
     });
   });
-  ABS_LIST.forEach(function(ex) {
-    if (allExercises.indexOf(ex) === -1) allExercises.push(ex);
-  });
 
   var records = {};
   var history = {};
@@ -643,11 +711,10 @@ function RecordsTab(props) {
     });
   });
 
-  var filterOptions = ["todos"].concat(Object.keys(WORKOUTS)).concat(["Abs"]);
+  var filterOptions = ["todos"].concat(Object.keys(WORKOUTS));
 
   var filtered = allExercises.filter(function(ex) {
     if (filter === "todos") return true;
-    if (filter === "Abs") return ABS_LIST.indexOf(ex) !== -1;
     return WORKOUTS[filter] && WORKOUTS[filter].indexOf(ex) !== -1;
   }).filter(function(ex) {
     return history[ex] && history[ex].length > 0;
@@ -709,7 +776,7 @@ function RecordsTab(props) {
               </div>
               {rec && (
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: "#fdcb6e" }}>{rec.weight + "kg"}</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: YELLOW }}>{rec.weight + "kg"}</div>
                   <div style={{ fontSize: 9, color: MUTED }}>{(rec.reps ? "x " + rec.reps + " - " : "") + fmtDate(rec.date)}</div>
                 </div>
               )}
