@@ -868,7 +868,7 @@ function renderHome(){
     btn.style.background='';btn.style.color='';
   } else {
     document.getElementById('tcBar').style.background='#333';
-    document.getElementById('tcName').textContent='Dia de Descanso 🧘';
+    document.getElementById('tcName').textContent='Dia de Descanso';
     document.getElementById('tcSub').textContent='Sábado ou domingo — recuperação ativa';
     document.getElementById('tcPill').innerHTML='';
     const btn=document.getElementById('startBtn');
