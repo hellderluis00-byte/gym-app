@@ -75,8 +75,7 @@ HOME
 ══════════════════════════════════════ */
 .hero{
 padding:28px 16px 20px;
-background:radial-gradient(ellipse 120% 80% at 110% -10%,rgba(200,255,0,.06) 0%,transparent 60%),
-linear-gradient(180deg,#0d0d0d 0%,#080808 100%);
+background:radial-gradient(ellipse 120% 80% at 110% -10%,rgba(200,255,0,.06) 0%,transparent 60%), linear-gradient(180deg,#0d0d0d 0%,#080808 100%);
 border-bottom:1px solid var(–border);position:relative;overflow:hidden;
 }
 .hero-greeting{font-size:12px;font-weight:500;color:var(–muted);letter-spacing:.5px;margin-bottom:6px;}
